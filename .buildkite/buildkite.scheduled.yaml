@@ -1,0 +1,11 @@
+# .buildkite/pipeline.scheduled.yaml
+#
+# Nightly full fleet scan on Windows agents.
+# Dynamically generates parallel steps from each product repo's scan-config.yaml.
+
+steps:
+  - label: ":gear: Generate scan matrix"
+    key: generate-matrix
+    command: "powershell -ExecutionPolicy Bypass -File .buildkite\\pipelines\\Generate-Matrix.ps1"
+    agents:
+      queue: "mondoo-scanners"
