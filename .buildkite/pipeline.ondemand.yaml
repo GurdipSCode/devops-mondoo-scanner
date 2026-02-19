@@ -1,0 +1,23 @@
+# .buildkite/pipeline.on-demand.yaml
+#
+# Single tool scan. Trigger with env vars:
+#   SCAN_TOOL=vault  SCAN_ENV=production
+#   SCAN_TARGET=vault-prod-1.internal:22  (optional override)
+#   POLICY_REF=main  (optional pin)
+#   CONFIG_REF=main  (optional pin)
+
+steps:
+  - label: ":shield: Scan %SCAN_TOOL% (%SCAN_ENV%)"
+    command: |
+      powershell -ExecutionPolicy Bypass -Command "
+        $$extraArgs = @{}
+        if ($$env:SCAN_TARGET)  { $$extraArgs['TargetOverride'] = $$env:SCAN_TARGET }
+        if ($$env:POLICY_REF)   { $$extraArgs['PolicyRef']      = $$env:POLICY_REF }
+        if ($$env:CONFIG_REF)   { $$extraArgs['ConfigRef']      = $$env:CONFIG_REF }
+        & scripts\Invoke-Scan.ps1 -Tool $$env:SCAN_TOOL -Environment $$env:SCAN_ENV @extraArgs
+      "
+    agents:
+      queue: "mondoo"
+    timeout_in_minutes: 30
+    artifact_paths:
+      - "C:\\Users\\**\\AppData\\Local\\Temp\\mondoo-results\\**\\*"
